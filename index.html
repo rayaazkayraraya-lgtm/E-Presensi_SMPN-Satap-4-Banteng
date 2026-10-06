@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Presensi Siswa SMP</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- HEADER NAVBAR -->
+    <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-40 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('dashboard')">
+                <img id="header-logo" src="https://placehold.co/100x100/4f46e5/ffffff?text=SMP" alt="Logo Sekolah" class="w-10 h-10 rounded-full object-cover border-2 border-white/80 shadow-sm">
+                <div>
+                    <h1 id="header-school-name" class="font-bold text-lg sm:text-xl leading-tight">SMP Negeri 1 Nusantara</h1>
+                    <p id="header-school-city" class="text-xs text-indigo-200">Kabupaten Pendidikan - Indonesia</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <span id="header-academic-year" class="bg-indigo-800/80 text-indigo-100 text-xs px-3 py-1.5 rounded-full border border-indigo-500/40 font-medium">T.A. 2026/2027</span>
+                
+                <!-- Cloud Status Indicator -->
+                <div id="cloud-status-badge" class="flex items-center space-x-1.5 bg-emerald-500/20 text-emerald-200 text-xs px-3 py-1.5 rounded-full border border-emerald-400/30">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="font-medium">Cloud Sync Aktif</span>
+                </div>
+
+                <button onclick="navigateTo('dashboard')" class="bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+                    <i data-lucide="home" class="w-4 h-4 pointer-events-none"></i>
+                    <span>Beranda</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- DASHBOARD VIEW -->
+        <section id="view-dashboard" class="space-y-6">
+            <div class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="relative z-10 max-w-2xl">
+                    <h2 id="banner-title" class="text-2xl sm:text-3xl font-bold mb-2">Selamat Datang di Portal Presensi Siswa</h2>
+                    <p id="banner-desc" class="text-indigo-100 text-sm sm:text-base leading-relaxed opacity-95">
+                        Silakan pilih menu kelas untuk melakukan pencatatan presensi harian, mengakses media pembelajaran, dan mencoba game interaktif siswa.
+                    </p>
+                </div>
+                <div class="absolute -right-8 -bottom-10 opacity-15 pointer-events-none">
+                    <i data-lucide="graduation-cap" class="w-64 h-64 text-white"></i>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div onclick="openClassView(7)" class="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer border border-slate-200 group hover:-translate-y-1">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i data-lucide="book-open" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-lg">Kelas 7</h3>
+                    <p class="text-xs text-slate-500 mt-1">Presensi, Media & Game Kelas VII</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-blue-600">
+                        <span>Buka Menu</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </div>
+                </div>
+
+                <div onclick="openClassView(8)" class="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer border border-slate-200 group hover:-translate-y-1">
+                    <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i data-lucide="book-open-check" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-lg">Kelas 8</h3>
+                    <p class="text-xs text-slate-500 mt-1">Presensi, Media & Game Kelas VIII</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-600">
+                        <span>Buka Menu</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </div>
+                </div>
+
+                <div onclick="openClassView(9)" class="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer border border-slate-200 group hover:-translate-y-1">
+                    <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i data-lucide="award" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-lg">Kelas 9</h3>
+                    <p class="text-xs text-slate-500 mt-1">Presensi, Media & Game Kelas IX</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-600">
+                        <span>Buka Menu</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </div>
+                </div>
+
+                <div onclick="navigateTo('teacher')" class="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer border border-indigo-200 bg-indigo-50/50 group hover:-translate-y-1">
+                    <div class="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-md">
+                        <i data-lucide="user-cog" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-lg">Portal Guru</h3>
+                    <p class="text-xs text-slate-500 mt-1">Rekap, Kelola Siswa & Pengaturan</p>
+                    <div class="mt-4 pt-3 border-t border-indigo-100 flex items-center justify-between text-xs font-semibold text-indigo-700">
+                        <span>Akses Portal</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CLASS DETAIL VIEW -->
+        <section id="view-class" class="space-y-5 hidden">
+            <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex items-center space-x-3">
+                    <button onclick="navigateTo('dashboard')" class="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition">
+                        <i data-lucide="arrow-left" class="w-5 h-5 pointer-events-none"></i>
+                    </button>
+                    <div>
+                        <h2 id="class-view-title" class="text-xl font-bold text-slate-800">Kelas 7</h2>
+                        <p class="text-xs text-slate-500">Pencatatan presensi, media pembelajaran & game</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <label class="text-xs font-semibold text-slate-600">Tanggal:</label>
+                    <input type="date" id="presensi-date-input" onchange="renderClassPresensiTable()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+            </div>
+
+            <div class="flex border-b border-slate-200 bg-white rounded-t-xl px-4 pt-2 shadow-sm">
+                <button id="tab-btn-presensi" onclick="switchClassTab('presensi')" class="py-2.5 px-4 font-semibold text-sm border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2">
+                    <i data-lucide="clipboard-check" class="w-4 h-4 pointer-events-none"></i>
+                    <span>Presensi Siswa</span>
+                </button>
+                <button id="tab-btn-media" onclick="switchClassTab('media')" class="py-2.5 px-4 font-semibold text-sm text-slate-500 hover:text-slate-800 flex items-center gap-2">
+                    <i data-lucide="video" class="w-4 h-4 pointer-events-none"></i>
+                    <span>Media Pembelajaran</span>
+                </button>
+                <button id="tab-btn-game" onclick="switchClassTab('game')" class="py-2.5 px-4 font-semibold text-sm text-slate-500 hover:text-slate-800 flex items-center gap-2">
+                    <i data-lucide="gamepad-2" class="w-4 h-4 pointer-events-none"></i>
+                    <span>Game Interaktif</span>
+                </button>
+            </div>
+
+            <div id="class-subtab-presensi" class="space-y-4">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center">
+                        <span class="text-xs font-medium text-emerald-600 block">Hadir (H)</span>
+                        <span id="counter-hadir" class="text-xl font-bold text-emerald-700">0</span>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
+                        <span class="text-xs font-medium text-blue-600 block">Sakit (S)</span>
+                        <span id="counter-sakit" class="text-xl font-bold text-blue-700">0</span>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
+                        <span class="text-xs font-medium text-amber-600 block">Izin (I)</span>
+                        <span id="counter-izin" class="text-xl font-bold text-amber-700">0</span>
+                    </div>
+                    <div class="bg-rose-50 border border-rose-200 rounded-xl p-3 text-center">
+                        <span class="text-xs font-medium text-rose-600 block">Alpa (A)</span>
+                        <span id="counter-alpa" class="text-xl font-bold text-rose-700">0</span>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                                    <th class="py-3 px-4 w-12 text-center">No</th>
+                                    <th class="py-3 px-4 w-28">NISN</th>
+                                    <th class="py-3 px-4">Nama Siswa</th>
+                                    <th class="py-3 px-4 text-center">Aksi Presensi</th>
+                                    <th class="py-3 px-4 text-center w-28">Status Hari Ini</th>
+                                </tr>
+                            </thead>
+                            <tbody id="presensi-tbody" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="class-subtab-media" class="hidden space-y-4">
+                <div id="media-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+
+            <div id="class-subtab-game" class="hidden space-y-4">
+                <div id="game-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+        </section>
+
+        <!-- TEACHER PORTAL VIEW -->
+        <section id="view-teacher" class="space-y-5 hidden">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <button onclick="navigateTo('dashboard')" class="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition">
+                        <i data-lucide="arrow-left" class="w-5 h-5 pointer-events-none"></i>
+                    </button>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Portal Guru & Administrasi</h2>
+                        <p class="text-xs text-slate-500">Kelola data siswa, rekapitulasi, media & pengaturan sekolah</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 border-b border-slate-200 bg-white p-2 rounded-xl shadow-sm text-sm font-semibold">
+                <button id="teacher-nav-1" onclick="switchTeacherSubTab(1)" class="px-4 py-2 rounded-lg bg-indigo-600 text-white shadow-sm transition">1. Rekapitulasi Kehadiran</button>
+                <button id="teacher-nav-2" onclick="switchTeacherSubTab(2)" class="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">2. Kelola Siswa & Foto</button>
+                <button id="teacher-nav-3" onclick="switchTeacherSubTab(3)" class="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">3. Link Pembelajaran</button>
+                <button id="teacher-nav-4" onclick="switchTeacherSubTab(4)" class="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">4. Link Game Interaktif</button>
+                <button id="teacher-nav-5" onclick="switchTeacherSubTab(5)" class="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">5. Pengaturan Profil Sekolah</button>
+            </div>
+
+            <div id="teacher-subtab-1" class="space-y-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div>
+                            <label class="text-xs font-semibold text-slate-600 block mb-1">Kelas:</label>
+                            <select id="recap-filter-class" onchange="renderMonthlyRecap()" class="bg-slate-50 border border-slate-300 text-sm rounded-lg px-3 py-1.5 font-medium outline-none">
+                                <option value="7">Kelas 7</option>
+                                <option value="8">Kelas 8</option>
+                                <option value="9">Kelas 9</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-semibold text-slate-600 block mb-1">Bulan & Tahun:</label>
+                            <input type="month" id="recap-filter-month" onchange="renderMonthlyRecap()" class="bg-slate-50 border border-slate-300 text-sm rounded-lg px-3 py-1.5 font-medium outline-none">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <button onclick="exportRecapExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+                            <i data-lucide="file-spreadsheet" class="w-4 h-4 pointer-events-none"></i>
+                            <span>Download Excel (CSV)</span>
+                        </button>
+                        <button onclick="printRecapReport()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+                            <i data-lucide="printer" class="w-4 h-4 pointer-events-none"></i>
+                            <span>Cetak / PDF Kop Surat</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden p-4">
+                    <div id="recap-table-wrapper" class="overflow-x-auto"></div>
+                </div>
+            </div>
+
+            <div id="teacher-subtab-2" class="space-y-4 hidden">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <h3 class="font-bold text-slate-800 text-base">Daftar Siswa Terdaftar</h3>
+                    <button onclick="openAddStudentModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+                        <i data-lucide="user-plus" class="w-4 h-4 pointer-events-none"></i>
+                        <span>Tambah Siswa Baru</span>
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                                    <th class="py-3 px-4 w-12 text-center">No</th>
+                                    <th class="py-3 px-4 w-16 text-center">Foto</th>
+                                    <th class="py-3 px-4 w-28">NISN</th>
+                                    <th class="py-3 px-4">Nama Siswa</th>
+                                    <th class="py-3 px-4 w-24 text-center">Kelas</th>
+                                    <th class="py-3 px-4 text-center w-28">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="manage-students-tbody" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="teacher-subtab-3" class="space-y-4 hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="font-bold text-slate-800 text-base mb-4">Upload Link Pembelajaran Baru</h3>
+                        <form onsubmit="handleSaveMedia(event)" class="space-y-3">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-600 block mb-1">Target Kelas:</label>
+                                <select id="media-target-grade" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm outline-none">
+                                    <option value="7">Kelas 7</option>
+                                    <option value="8">Kelas 8</option>
+                                    <option value="9">Kelas 9</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-600 block mb-1">Judul Materi / Modul:</label>
+                                <input type="text" id="media-title" required placeholder="Contoh: Modul Digital Bahasa Indonesia" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-600 block mb-1">URL / Link Pembelajaran:</label>
+                                <input type="url" id="media-url" required placeholder="https://..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm outline-none">
+                            </div>
+                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition w-full">Simpan Link Pembelajaran</button>
+                        </form>
+                    </div>
+
+                    <div class="lg:col-span-2 bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-3">
+                        <h3 class="font-bold text-slate-800 text-base">Daftar Link Pembelajaran Tersimpan</h3>
+                        <div id="teacher-media-list" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="teacher-subtab-4" class="space-y-4 hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="font-bold text-slate-800 text-base mb-4">Upload Link Game Interaktif</h3>
+                        <form onsubmit="handleSaveGame(event)" class="space-y-3">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-600 block mb-1">Target Kelas:</label>
+                                <select id="game-target-grade" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm outline-none">
+                                    <option value="7">Kelas 7</option>
+                                    <option value="8">Kelas 8</option>
+                                    <option value="9">Kelas 9</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-600 block mb-1">Nama Game / Kuis:</label>
+                                <input type="text" id="game-title" required placeholder="Contoh: Kuis Wordwall IPA Sel" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-600 block mb-1">URL / Link Game (Wordwall/Quizizz):</label>
+                                <input type="url" id="game-url" required placeholder="https://..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm outline-none">
+                            </div>
+                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition w-full">Simpan Link Game</button>
+                        </form>
+                    </div>
+
+                    <div class="lg:col-span-2 bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-3">
+                        <h3 class="font-bold text-slate-800 text-base">Daftar Link Game Tersimpan</h3>
+                        <div id="teacher-game-list" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="teacher-subtab-5" class="space-y-4 hidden">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 max-w-3xl space-y-6">
+                    <h3 class="font-bold text-slate-800 text-lg border-b border-slate-100 pb-3">Pengaturan Profil Sekolah & Kop Surat Laporan</h3>
+                    
+                    <form onsubmit="handleSaveSchoolProfile(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-600 block mb-1">Nama Sekolah / Lembaga:</label>
+                                <input type="text" id="profile-school-name" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-600 block mb-1">Kota / Kabupaten / Alamat:</label>
+                                <input type="text" id="profile-school-city" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-semibold text-slate-600 block mb-1">Tahun Ajaran Aktif:</label>
+                            <input type="text" id="profile-academic-year" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm outline-none">
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-semibold text-slate-600 block mb-1">Judul Banner Beranda:</label>
+                            <input type="text" id="profile-banner-title" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm outline-none">
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-semibold text-slate-600 block mb-1">Deskripsi Banner Beranda:</label>
+                            <textarea id="profile-banner-desc" rows="2" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm outline-none"></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-600 block mb-1">Logo Kiri (Kop Surat):</label>
+                                <input type="file" accept="image/*" onchange="previewLogoLeft(event)" class="text-xs text-slate-500 mb-2">
+                                <img id="logo-left-preview" src="" class="w-16 h-16 object-cover rounded-lg border border-slate-200">
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-600 block mb-1">Logo Kanan (Kop Surat & Header):</label>
+                                <input type="file" accept="image/*" onchange="previewLogoRight(event)" class="text-xs text-slate-500 mb-2">
+                                <img id="logo-right-preview" src="" class="w-16 h-16 object-cover rounded-lg border border-slate-200">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-xs font-semibold transition">Simpan Pengaturan Profil</button>
+                    </form>
+
+                    <div class="border-t border-rose-100 pt-6 mt-6">
+                        <h4 class="font-bold text-rose-700 text-sm mb-1 flex items-center gap-1.5">
+                            <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600"></i>
+                            <span>Zona Reset Data Simulasi</span>
+                        </h4>
+                        <p class="text-xs text-slate-500 mb-3">Gunakan menu ini untuk membersihkan data uji coba sebelum aplikasi digunakan secara resmi.</p>
+                        
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="openResetModal('presensi')" class="bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 px-3.5 py-2 rounded-lg text-xs font-semibold transition">Reset Riwayat Presensi Saja</button>
+                            <button onclick="openResetModal('total')" class="bg-rose-600 text-white hover:bg-rose-700 px-3.5 py-2 rounded-lg text-xs font-semibold transition">Reset Total Semua Data Simulasi</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODALS -->
+    <div id="modal-presensi-verify" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center space-y-4 border border-slate-100 relative overflow-hidden">
+            <h3 class="font-bold text-slate-800 text-lg">Verifikasi Presensi</h3>
+            <p id="verify-student-name" class="text-sm font-semibold text-indigo-600">Ahmad Fauzi (NISN: 0081234567)</p>
+            <p id="verify-status-badge" class="inline-block bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">STATUS: HADIR</p>
+            
+            <div class="relative w-56 h-56 mx-auto rounded-xl overflow-hidden border-2 border-indigo-200 shadow-inner bg-slate-100">
+                <img id="verify-student-photo" src="" alt="Foto Siswa" class="w-full h-full object-cover">
+                <canvas id="shatter-canvas" width="220" height="220" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+            </div>
+
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div id="timer-bar" class="bg-indigo-600 h-full w-full"></div>
+            </div>
+            <p class="text-xs text-slate-400">Menyimpan presensi dalam 2 detik...</p>
+        </div>
+    </div>
+
+    <div id="modal-student-form" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-100">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 id="modal-student-title" class="font-bold text-slate-800 text-base">Tambah Siswa Baru</h3>
+                <button onclick="closeStudentModal()" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-5 h-5 pointer-events-none"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleSaveStudent(event)" class="space-y-3">
+                <input type="hidden" id="student-edit-id">
+                <div>
+                    <label class="text-xs font-semibold text-slate-600 block mb-1">Nama Lengkap Siswa:</label>
+                    <input type="text" id="student-name" required placeholder="Contoh: Ahmad Fauzi" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm outline-none">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-slate-600 block mb-1">NISN:</label>
+                    <input type="text" id="student-nisn" required placeholder="Contoh: 0081234567" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm outline-none">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-slate-600 block mb-1">Kelas:</label>
+                    <select id="student-grade" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm outline-none">
+                        <option value="7">Kelas 7</option>
+                        <option value="8">Kelas 8</option>
+                        <option value="9">Kelas 9</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-slate-600 block mb-1">Upload Foto Siswa:</label>
+                    <input type="file" id="student-photo-file" accept="image/*" onchange="previewStudentPhoto(event)" class="text-xs text-slate-500 mb-2">
+                    <img id="student-photo-preview" src="https://placehold.co/150x150/e2e8f0/64748b?text=Foto" class="w-20 h-20 object-cover rounded-lg border border-slate-200">
+                </div>
+                <div class="pt-3 flex justify-end space-x-2">
+                    <button type="button" onclick="closeStudentModal()" class="px-4 py-2 bg-slate-100 text-slate-600 text-xs font-semibold rounded-lg hover:bg-slate-200">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700">Simpan Siswa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-delete-student" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center space-y-4 border border-slate-100">
+            <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto">
+                <i data-lucide="trash-2" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-base">Hapus Data Siswa?</h3>
+            <p id="delete-student-msg" class="text-xs text-slate-500">Apakah Anda yakin ingin menghapus siswa ini secara permanen?</p>
+            <input type="hidden" id="delete-student-id">
+            <div class="flex justify-center space-x-2 pt-2">
+                <button onclick="closeDeleteStudentModal()" class="px-4 py-2 bg-slate-100 text-slate-600 text-xs font-semibold rounded-lg hover:bg-slate-200">Batal</button>
+                <button onclick="confirmDeleteStudent()" class="px-4 py-2 bg-rose-600 text-white text-xs font-semibold rounded-lg hover:bg-rose-700">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-reset-confirm" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center space-y-4 border border-slate-100">
+            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto">
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-base">Konfirmasi Reset Data</h3>
+            <p id="reset-confirm-msg" class="text-xs text-slate-500">Seluruh data presensi simulasi akan dibersihkan.</p>
+            <input type="hidden" id="reset-type-input">
+            <div class="flex justify-center space-x-2 pt-2">
+                <button onclick="closeResetModal()" class="px-4 py-2 bg-slate-100 text-slate-600 text-xs font-semibold rounded-lg hover:bg-slate-200">Batal</button>
+                <button onclick="executeDataReset()" class="px-4 py-2 bg-rose-600 text-white text-xs font-semibold rounded-lg hover:bg-rose-700">Ya, Lanjutkan Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="print-area" class="hidden p-8 bg-white text-slate-900"></div>
+
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 text-white text-xs px-4 py-3 rounded-xl shadow-lg z-50 transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-2">
+        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+        <span id="toast-message">Pemberitahuan</span>
+    </div>
+
+    <!-- Firebase Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'presensi-smp-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "", authDomain: "demo.firebaseapp.com", projectId: "demo-app", storageBucket: "demo.appspot.com", messagingSenderId: "123456789", appId: "1:123456789:web:demo"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        window.db = db; window.auth = auth; window.appId = appId;
+        window.signInWithCustomToken = signInWithCustomToken; window.signInAnonymously = signInAnonymously;
+        window.doc = doc; window.setDoc = setDoc; window.collection = collection; window.onSnapshot = onSnapshot;
+    </script>
+
+    <script>
+        // =========================================================
+        // URL GOOGLE APPS SCRIPT SUDAH TERPASANG DAN AKTIF DI SINI:
+        // =========================================================
+        const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhs4ghRDhgDouY-fpw3CsGjMgYzOw-YRwFhZNqc2-31Vao0wGBzyKUgpAXikTO8cwa/exec";
+
+        let currentView = 'dashboard';
+        let currentClassGrade = 7;
+        let currentClassTab = 'presensi';
+        let currentTeacherSubTab = 1;
+
+        let schoolProfile = {
+            name: "SMP Negeri 1 Nusantara", city: "Kabupaten Pendidikan - Indonesia", academicYear: "T.A. 2026/2027",
+            bannerTitle: "Selamat Datang di Portal Presensi Siswa", bannerDesc: "Silakan pilih menu kelas untuk melakukan pencatatan presensi harian, mengakses media pembelajaran, dan mencoba game interaktif siswa.",
+            logoLeft: "https://placehold.co/100x100/e2e8f0/64748b?text=Tut+Wuri", logoRight: "https://placehold.co/100x100/4f46e5/ffffff?text=SMP"
+        };
+
+        let students = [
+            { id: "s1", nisn: "0081234501", name: "Ahmad Fauzi", grade: 7, photo: "https://placehold.co/150x150/e0e7ff/3730a3?text=Ahmad" },
+            { id: "s2", nisn: "0081234502", name: "Budi Santoso", grade: 7, photo: "https://placehold.co/150x150/dcfce7/166534?text=Budi" },
+            { id: "s3", nisn: "0081234503", name: "Citra Dewi", grade: 8, photo: "https://placehold.co/150x150/fef3c7/92400e?text=Citra" },
+            { id: "s4", nisn: "0081234504", name: "Deni Pratama", grade: 8, photo: "https://placehold.co/150x150/fee2e2/991b1b?text=Deni" },
+            { id: "s5", nisn: "0081234505", name: "Eka Rahmawati", grade: 9, photo: "https://placehold.co/150x150/f3e8ff/6b21a8?text=Eka" }
+        ];
+
+        let attendanceRecords = {};
+        let mediaLinks = [
+            { id: "m1", grade: 7, title: "Modul Digital Bahasa Indonesia Bab 1", url: "https://kemdikbud.go.id" },
+            { id: "m2", grade: 8, title: "Video Pembelajaran Matematika Bangun Ruang", url: "https://youtube.com" }
+        ];
+        let gameLinks = [
+            { id: "g1", grade: 7, title: "Kuis Interaktif Wordwall Bahasa Inggris", url: "https://wordwall.net" },
+            { id: "g2", grade: 8, title: "Quizizz IPA Tata Surya", url: "https://quizizz.com" }
+        ];
+
+        let currentUser = null;
+
+        function normalizeGrade(val) {
+            const num = parseInt(val, 10);
+            return (num === 7 || num === 8 || num === 9) ? num : 7;
+        }
+
+        function getLocalDateString() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function compressImage(file, maxWidth, maxHeight, quality, callback) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    if (w > h) { if (w > maxWidth) { h = Math.round((h * maxWidth) / w); w = maxWidth; } }
+                    else { if (h > maxHeight) { w = Math.round((w * maxHeight) / h); h = maxHeight; } }
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    callback(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.onerror = () => callback("https://placehold.co/150x150/e2e8f0/64748b?text=Foto");
+                img.src = e.target.result;
+            };
+            reader.onerror = () => callback("https://placehold.co/150x150/e2e8f0/64748b?text=Foto");
+            reader.readAsDataURL(file);
+        }
+
+        function loadLocalData() {
+            try {
+                const p = localStorage.getItem('smp_school_profile'); if (p) schoolProfile = JSON.parse(p);
+                const s = localStorage.getItem('smp_students'); if (s) { students = JSON.parse(s); students.forEach(st => st.grade = normalizeGrade(st.grade)); }
+                const a = localStorage.getItem('smp_attendance'); if (a) attendanceRecords = JSON.parse(a);
+                const m = localStorage.getItem('smp_media'); if (m) mediaLinks = JSON.parse(m);
+                const g = localStorage.getItem('smp_games'); if (g) gameLinks = JSON.parse(g);
+            } catch(e) { console.warn("Membaca localStorage dibatasi:", e); }
+        }
+
+        function saveLocalData() {
+            try {
+                localStorage.setItem('smp_school_profile', JSON.stringify(schoolProfile));
+                localStorage.setItem('smp_students', JSON.stringify(students));
+                localStorage.setItem('smp_attendance', JSON.stringify(attendanceRecords));
+                localStorage.setItem('smp_media', JSON.stringify(mediaLinks));
+                localStorage.setItem('smp_games', JSON.stringify(gameLinks));
+            } catch (e) { console.warn("Penyimpanan lokal dibatasi atau penuh:", e); }
+        }
+
+        async function initCloudSync() {
+            if (!window.db || !window.auth) return;
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    currentUser = (await window.signInWithCustomToken(window.auth, __initial_auth_token)).user;
+                } else {
+                    currentUser = (await window.signInAnonymously(window.auth)).user;
+                }
+
+                const badge = document.getElementById('cloud-status-badge');
+                if (badge) badge.classList.remove('hidden');
+
+                window.onSnapshot(window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'config', 'schoolProfile'), (docSnap) => {
+                    if (docSnap.exists()) { schoolProfile = docSnap.data(); renderHeaderSchoolInfo(); }
+                    else { window.setDoc(docSnap.ref, schoolProfile); }
+                });
+
+                window.onSnapshot(window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'students'), (snapshot) => {
+                    if (!snapshot.empty) {
+                        const list = [];
+                        snapshot.forEach(d => { const data = d.data(); data.id = d.id; data.grade = normalizeGrade(data.grade); list.push(data); });
+                        students = list; saveLocalData();
+                        if (currentView === 'class') renderClassPresensiTable();
+                        if (currentView === 'teacher') renderManageStudentTable();
+                    }
+                });
+
+                window.onSnapshot(window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'attendance'), (snapshot) => {
+                    if (!snapshot.empty) {
+                        snapshot.forEach(d => {
+                            if (d.id === 'reset_trigger') return;
+                            attendanceRecords[d.id] = { ...(attendanceRecords[d.id] || {}), ...(d.data().records || {}) };
+                        });
+                        saveLocalData();
+                        if (currentView === 'class') renderClassPresensiTable();
+                        if (currentView === 'teacher') renderMonthlyRecap();
+                    }
+                });
+
+                window.onSnapshot(window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'media'), (snapshot) => {
+                    if (!snapshot.empty) {
+                        const list = []; snapshot.forEach(d => { const data = d.data(); data.id = d.id; list.push(data); });
+                        mediaLinks = list; saveLocalData();
+                        if (currentView === 'class') renderMediaCards();
+                        renderTeacherMediaList();
+                    }
+                });
+
+                window.onSnapshot(window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'games'), (snapshot) => {
+                    if (!snapshot.empty) {
+                        const list = []; snapshot.forEach(d => { const data = d.data(); data.id = d.id; list.push(data); });
+                        gameLinks = list; saveLocalData();
+                        if (currentView === 'class') renderGameCards();
+                        renderTeacherGameList();
+                    }
+                });
+            } catch (err) { console.error("Cloud Init Failed:", err); }
+        }
+
+        window.navigateTo = function(view) {
+            currentView = view;
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-class').classList.add('hidden');
+            document.getElementById('view-teacher').classList.add('hidden');
+
+            if (view === 'dashboard') document.getElementById('view-dashboard').classList.remove('hidden');
+            else if (view === 'class') document.getElementById('view-class').classList.remove('hidden');
+            else if (view === 'teacher') { document.getElementById('view-teacher').classList.remove('hidden'); renderTeacherSubTab(); }
+            if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+        };
+
+        window.openClassView = function(grade) {
+            currentClassGrade = normalizeGrade(grade);
+            document.getElementById('class-view-title').textContent = `Kelas ${currentClassGrade}`;
+            switchClassTab('presensi');
+            navigateTo('class');
+        };
+
+        window.switchClassTab = function(tab) {
+            currentClassTab = tab;
+            document.getElementById('class-subtab-presensi').classList.add('hidden');
+            document.getElementById('class-subtab-media').classList.add('hidden');
+            document.getElementById('class-subtab-game').classList.add('hidden');
+
+            document.getElementById('tab-btn-presensi').className = "py-2.5 px-4 font-semibold text-sm text-slate-500 flex items-center gap-2";
+            document.getElementById('tab-btn-media').className = "py-2.5 px-4 font-semibold text-sm text-slate-500 flex items-center gap-2";
+            document.getElementById('tab-btn-game').className = "py-2.5 px-4 font-semibold text-sm text-slate-500 flex items-center gap-2";
+
+            if (tab === 'presensi') {
+                document.getElementById('class-subtab-presensi').classList.remove('hidden');
+                document.getElementById('tab-btn-presensi').className = "py-2.5 px-4 font-semibold text-sm border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2";
+                renderClassPresensiTable();
+            } else if (tab === 'media') {
+                document.getElementById('class-subtab-media').classList.remove('hidden');
+                document.getElementById('tab-btn-media').className = "py-2.5 px-4 font-semibold text-sm border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2";
+                renderMediaCards();
+            } else if (tab === 'game') {
+                document.getElementById('class-subtab-game').classList.remove('hidden');
+                document.getElementById('tab-btn-game').className = "py-2.5 px-4 font-semibold text-sm border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2";
+                renderGameCards();
+            }
+            if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+        };
+
+        window.renderClassPresensiTable = function() {
+            const dateVal = document.getElementById('presensi-date-input').value || getLocalDateString();
+            const classStudents = students.filter(s => normalizeGrade(s.grade) === currentClassGrade);
+            const tbody = document.getElementById('presensi-tbody');
+            tbody.innerHTML = '';
+
+            let cH = 0, cS = 0, cI = 0, cA = 0;
+            const dateRecord = attendanceRecords[dateVal] || {};
+
+            if (classStudents.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400 text-xs">Belum ada data siswa di Kelas ${currentClassGrade}</td></tr>`;
+            } else {
+                classStudents.forEach((student, index) => {
+                    const status = dateRecord[student.id] || '-';
+                    if (status === 'H') cH++; else if (status === 'S') cS++; else if (status === 'I') cI++; else if (status === 'A') cA++;
+
+                    let statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-500">Belum</span>`;
+                    if (status === 'H') statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">Hadir (H)</span>`;
+                    else if (status === 'S') statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Sakit (S)</span>`;
+                    else if (status === 'I') statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">Izin (I)</span>`;
+                    else if (status === 'A') statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700">Alpa (A)</span>`;
+
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50/80 transition";
+                    tr.innerHTML = `
+                        <td class="py-3 px-4 text-center font-medium text-slate-500">${index + 1}</td>
+                        <td class="py-3 px-4 font-mono text-slate-600 text-xs">${student.nisn}</td>
+                        <td class="py-3 px-4 font-bold text-slate-800">${student.name}</td>
+                        <td class="py-3 px-4 text-center">
+                            <div class="flex items-center justify-center space-x-1.5">
+                                <button onclick="triggerPresensi('${student.id}', 'H')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold shadow-sm">Hadir</button>
+                                <button onclick="triggerPresensi('${student.id}', 'S')" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-bold shadow-sm">Sakit</button>
+                                <button onclick="triggerPresensi('${student.id}', 'I')" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-xs font-bold shadow-sm">Izin</button>
+                                <button onclick="triggerPresensi('${student.id}', 'A')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-xs font-bold shadow-sm">Alpa</button>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4 text-center">${statusBadge}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('counter-hadir').textContent = cH;
+            document.getElementById('counter-sakit').textContent = cS;
+            document.getElementById('counter-izin').textContent = cI;
+            document.getElementById('counter-alpa').textContent = cA;
+        };
+
+        window.triggerPresensi = function(studentId, status) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+
+            const modal = document.getElementById('modal-presensi-verify');
+            document.getElementById('verify-student-name').textContent = `${student.name} (NISN: ${student.nisn})`;
+
+            const statusMap = { 'H': 'HADIR', 'S': 'SAKIT', 'I': 'IZIN', 'A': 'ALPA' };
+            const statusColorMap = { 'H': 'bg-emerald-100 text-emerald-700', 'S': 'bg-blue-100 text-blue-700', 'I': 'bg-amber-100 text-amber-700', 'A': 'bg-rose-100 text-rose-700' };
+            const verifyBadge = document.getElementById('verify-status-badge');
+            verifyBadge.textContent = `STATUS: ${statusMap[status]}`;
+            verifyBadge.className = `inline-block text-xs font-bold px-3 py-1 rounded-full ${statusColorMap[status]}`;
+
+            const imgEl = document.getElementById('verify-student-photo');
+            const canvas = document.getElementById('shatter-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, 220, 220);
+
+            const timerBar = document.getElementById('timer-bar');
+            timerBar.style.transition = 'none';
+            timerBar.style.width = '100%';
+
+            imgEl.src = student.photo || "https://placehold.co/150x150/e2e8f0/64748b?text=Foto";
+            modal.classList.remove('hidden');
+
+            setTimeout(() => {
+                timerBar.style.transition = 'width 2000ms linear';
+                timerBar.style.width = '0%';
+            }, 50);
+
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.src = imgEl.src;
+            img.onload = function() {
+                setTimeout(() => {
+                    runShatterEffect(ctx, img, () => {
+                        const dateVal = document.getElementById('presensi-date-input').value || getLocalDateString();
+                        if (!attendanceRecords[dateVal]) attendanceRecords[dateVal] = {};
+                        attendanceRecords[dateVal][studentId] = status;
+
+                        saveLocalData();
+                        renderClassPresensiTable();
+
+                        // KIRIM DATA PRESENSI KE GOOGLE SHEETS VIA APPS SCRIPT
+                        if (GOOGLE_APPS_SCRIPT_URL !== "") {
+                            fetch(GOOGLE_APPS_SCRIPT_URL, {
+                                method: 'POST',
+                                mode: 'no-cors',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    action: 'presensi',
+                                    tanggal: dateVal,
+                                    kelas: `Kelas ${currentClassGrade}`,
+                                    nisn: student.nisn,
+                                    nama: student.name,
+                                    status: statusMap[status]
+                                })
+                            }).catch(err => console.error("Error Apps Script Presensi:", err));
+                        }
+
+                        if (window.db && currentUser) {
+                            window.setDoc(window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'attendance', dateVal), {
+                                records: attendanceRecords[dateVal]
+                            }, { merge: true }).catch(err => console.error("Cloud save err:", err));
+                        }
+
+                        modal.classList.add('hidden');
+                        showToast(`Presensi ${student.name} (${statusMap[status]}) Berhasil!`);
+                    });
+                }, 2000);
+            };
+        };
+
+        function runShatterEffect(ctx, img, onComplete) {
+            const width = 220, height = 220, pieces = [];
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const rows = 4, cols = 4, pw = width / cols, ph = height / rows;
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    pieces.push({
+                        x: c * pw, y: r * ph,
+                        vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12 - 4,
+                        rot: 0, vRot: (Math.random() - 0.5) * 0.3
+                    });
+                }
+            }
+
+            let startTime = null;
+            function animate(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = timestamp - startTime;
+                ctx.clearRect(0, 0, width, height);
+
+                pieces.forEach(p => {
+                    p.x += p.vx; p.y += p.vy; p.vy += 0.5; p.rot += p.vRot;
+                    ctx.save();
+                    ctx.translate(p.x + pw / 2, p.y + ph / 2);
+                    ctx.rotate(p.rot);
+                    ctx.drawImage(img, p.x, p.y, pw, ph, -pw / 2, -ph / 2, pw, ph);
+                    ctx.restore();
+                });
+
+                if (progress < 600) { requestAnimationFrame(animate); } 
+                else { ctx.clearRect(0, 0, width, height); onComplete(); }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        window.renderMediaCards = function() {
+            const container = document.getElementById('media-cards-container');
+            const items = mediaLinks.filter(m => normalizeGrade(m.grade) === currentClassGrade);
+            container.innerHTML = '';
+
+            if (items.length === 0) {
+                container.innerHTML = `<div class="col-span-2 text-center py-8 text-slate-400 text-xs">Belum ada media pembelajaran untuk Kelas ${currentClassGrade}</div>`;
+                return;
+            }
+
+            items.forEach(m => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between";
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center">
+                            <i data-lucide="video" class="w-5 h-5 pointer-events-none"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-sm">${m.title}</h4>
+                            <a href="${m.url}" target="_blank" class="text-xs text-indigo-600 hover:underline">Buka Link Pembelajaran</a>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+        };
+
+        window.renderGameCards = function() {
+            const container = document.getElementById('game-cards-container');
+            const items = gameLinks.filter(g => normalizeGrade(g.grade) === currentClassGrade);
+            container.innerHTML = '';
+
+            if (items.length === 0) {
+                container.innerHTML = `<div class="col-span-2 text-center py-8 text-slate-400 text-xs">Belum ada game interaktif untuk Kelas ${currentClassGrade}</div>`;
+                return;
+            }
+
+            items.forEach(g => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between";
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
+                            <i data-lucide="gamepad-2" class="w-5 h-5 pointer-events-none"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-sm">${g.title}</h4>
+                            <a href="${g.url}" target="_blank" class="text-xs text-purple-600 hover:underline font-semibold">Mainkan Game</a>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+        };
+
+        window.switchTeacherSubTab = function(index) {
+            currentTeacherSubTab = index;
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`teacher-subtab-${i}`).classList.add('hidden');
+                const btn = document.getElementById(`teacher-nav-${i}`);
+                if (btn) btn.className = "px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition";
+            }
+
+            document.getElementById(`teacher-subtab-${index}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`teacher-nav-${index}`);
+            if (activeBtn) activeBtn.className = "px-4 py-2 rounded-lg bg-indigo-600 text-white shadow-sm transition";
+
+            renderTeacherSubTab();
+        };
+
+        function renderTeacherSubTab() {
+            if (currentTeacherSubTab === 1) renderMonthlyRecap();
+            else if (currentTeacherSubTab === 2) renderManageStudentTable();
+            else if (currentTeacherSubTab === 3) renderTeacherMediaList();
+            else if (currentTeacherSubTab === 4) renderTeacherGameList();
+            else if (currentTeacherSubTab === 5) renderSchoolProfileForm();
+            if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+        }
+
+        window.renderMonthlyRecap = function() {
+            const gradeFilter = normalizeGrade(document.getElementById('recap-filter-class').value);
+            const monthVal = document.getElementById('recap-filter-month').value || new Date().toISOString().substring(0, 7);
+            const filteredStudents = students.filter(s => normalizeGrade(s.grade) === gradeFilter);
+            const wrapper = document.getElementById('recap-table-wrapper');
+
+            const [yr, mo] = monthVal.split('-').map(Number);
+            const daysInMonth = new Date(yr, mo, 0).getDate();
+
+            let html = `
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-300">
+                            <th class="p-2 w-8 text-center border-r border-slate-200">No</th>
+                            <th class="p-2 w-24 border-r border-slate-200">NISN</th>
+                            <th class="p-2 border-r border-slate-200 min-w-[140px]">Nama Siswa</th>
+            `;
+
+            for (let d = 1; d <= daysInMonth; d++) html += `<th class="p-1 text-center w-7 border-r border-slate-200">${d}</th>`;
+
+            html += `
+                            <th class="p-2 text-center bg-emerald-50 text-emerald-800 w-8">H</th>
+                            <th class="p-2 text-center bg-blue-50 text-blue-800 w-8">S</th>
+                            <th class="p-2 text-center bg-amber-50 text-amber-800 w-8">I</th>
+                            <th class="p-2 text-center bg-rose-50 text-rose-800 w-8">A</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+            `;
+
+            if (filteredStudents.length === 0) {
+                html += `<tr><td colspan="${daysInMonth + 8}" class="text-center py-6 text-slate-400">Tidak ada data siswa untuk Kelas ${gradeFilter}</td></tr>`;
+            } else {
+                filteredStudents.forEach((st, idx) => {
+                    let totalH = 0, totalS = 0, totalI = 0, totalA = 0;
+                    html += `
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-2 text-center border-r border-slate-200">${idx + 1}</td>
+                            <td class="p-2 font-mono border-r border-slate-200">${st.nisn}</td>
+                            <td class="p-2 font-bold text-slate-800 border-r border-slate-200">${st.name}</td>
+                    `;
+
+                    for (let d = 1; d <= daysInMonth; d++) {
+                        const dayStr = String(d).padStart(2, '0');
+                        const dateKey = `${monthVal}-${dayStr}`;
+                        const status = (attendanceRecords[dateKey] && attendanceRecords[dateKey][st.id]) || '-';
+
+                        if (status === 'H') totalH++; else if (status === 'S') totalS++; else if (status === 'I') totalI++; else if (status === 'A') totalA++;
+
+                        let cellText = '-';
+                        let cellClass = 'text-slate-300';
+                        if (status === 'H') { cellText = 'H'; cellClass = 'text-emerald-600 font-bold bg-emerald-50'; }
+                        else if (status === 'S') { cellText = 'S'; cellClass = 'text-blue-600 font-bold bg-blue-50'; }
+                        else if (status === 'I') { cellText = 'I'; cellClass = 'text-amber-600 font-bold bg-amber-50'; }
+                        else if (status === 'A') { cellText = 'A'; cellClass = 'text-rose-600 font-bold bg-rose-50'; }
+
+                        html += `<td class="p-1 text-center border-r border-slate-200 ${cellClass}">${cellText}</td>`;
+                    }
+
+                    html += `
+                            <td class="p-2 text-center font-bold text-emerald-700 bg-emerald-50/50">${totalH}</td>
+                            <td class="p-2 text-center font-bold text-blue-700 bg-blue-50/50">${totalS}</td>
+                            <td class="p-2 text-center font-bold text-amber-700 bg-amber-50/50">${totalI}</td>
+                            <td class="p-2 text-center font-bold text-rose-700 bg-rose-50/50">${totalA}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            html += `</tbody></table>`;
+            wrapper.innerHTML = html;
+        };
+
+        window.exportRecapExcel = function() {
+            const gradeFilter = normalizeGrade(document.getElementById('recap-filter-class').value);
+            const monthVal = document.getElementById('recap-filter-month').value || new Date().toISOString().substring(0, 7);
+            const filteredStudents = students.filter(s => normalizeGrade(s.grade) === gradeFilter);
+
+            const [yr, mo] = monthVal.split('-').map(Number);
+            const daysInMonth = new Date(yr, mo, 0).getDate();
+
+            let csv = `REKAPITULASI PRESENSI - KELAS ${gradeFilter}\nBulan: ${monthVal}, Sekolah: ${schoolProfile.name}\n\nNo,NISN,Nama Siswa`;
+            for (let d = 1; d <= daysInMonth; d++) csv += `,${d}`;
+            csv += `,H,S,I,A\n`;
+
+            filteredStudents.forEach((st, idx) => {
+                let row = `${idx + 1},"${st.nisn}","${st.name}"`;
+                let totalH = 0, totalS = 0, totalI = 0, totalA = 0;
+
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const dayStr = String(d).padStart(2, '0');
+                    const status = (attendanceRecords[`${monthVal}-${dayStr}`] && attendanceRecords[`${monthVal}-${dayStr}`][st.id]) || '-';
+
+                    if (status === 'H') totalH++; else if (status === 'S') totalS++; else if (status === 'I') totalI++; else if (status === 'A') totalA++;
+                    row += `,${status}`;
+                }
+                row += `,${totalH},${totalS},${totalI},${totalA}\n`;
+                csv += row;
+            });
+
+            const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Rekap_Presensi_Kelas_${gradeFilter}_${monthVal}.csv`;
+            link.click();
+        };
+
+        window.printRecapReport = function() {
+            const gradeFilter = normalizeGrade(document.getElementById('recap-filter-class').value);
+            const monthVal = document.getElementById('recap-filter-month').value || new Date().toISOString().substring(0, 7);
+            const printArea = document.getElementById('print-area');
+
+            printArea.innerHTML = `
+                <div class="flex items-center justify-between border-b-4 border-slate-800 pb-4 mb-6">
+                    <img src="${schoolProfile.logoLeft}" class="w-20 h-20 object-cover">
+                    <div class="text-center px-4">
+                        <h2 class="text-xl font-bold uppercase tracking-wide">${schoolProfile.name}</h2>
+                        <p class="text-sm text-slate-600">${schoolProfile.city}</p>
+                        <p class="text-xs font-semibold text-slate-500 mt-1">${schoolProfile.academicYear}</p>
+                        <p class="text-sm font-bold text-indigo-700 mt-2">REKAPITULASI PRESENSI SISWA - KELAS ${gradeFilter}</p>
+                    </div>
+                    <img src="${schoolProfile.logoRight}" class="w-20 h-20 object-cover">
+                </div>
+                <div class="mb-4 text-xs font-semibold"><span>Periode Bulan: ${monthVal}</span></div>
+                ${document.getElementById('recap-table-wrapper').innerHTML}
+            `;
+
+            printArea.classList.remove('hidden');
+            window.print();
+            printArea.classList.add('hidden');
+        };
+
+        window.renderManageStudentTable = function() {
+            const tbody = document.getElementById('manage-students-tbody');
+            tbody.innerHTML = '';
+
+            if (students.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400 text-xs">Belum ada siswa terdaftar</td></tr>`;
+                return;
+            }
+
+            students.forEach((st, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-center text-slate-500 font-medium">${idx + 1}</td>
+                    <td class="py-3 px-4 text-center">
+                        <img src="${st.photo || "https://placehold.co/150x150/e2e8f0/64748b?text=Foto"}" class="w-9 h-9 object-cover rounded-full mx-auto border border-slate-200">
+                    </td>
+                    <td class="py-3 px-4 font-mono text-xs text-slate-600">${st.nisn}</td>
+                    <td class="py-3 px-4 font-bold text-slate-800">${st.name}</td>
+                    <td class="py-3 px-4 text-center font-semibold text-indigo-600">Kelas ${normalizeGrade(st.grade)}</td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex items-center justify-center space-x-2">
+                            <button onclick="openEditStudentModal('${st.id}')" class="p-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg transition" title="Edit Siswa">
+                                <i data-lucide="pencil" class="w-4 h-4 pointer-events-none"></i>
+                            </button>
+                            <button onclick="openDeleteStudentModal('${st.id}')" class="p-1.5 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-lg transition" title="Hapus Siswa">
+                                <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+        };
+
+        window.openAddStudentModal = function() {
+            document.getElementById('student-edit-id').value = '';
+            document.getElementById('student-name').value = '';
+            document.getElementById('student-nisn').value = '';
+            document.getElementById('student-grade').value = '7';
+            document.getElementById('student-photo-file').value = '';
+            document.getElementById('student-photo-preview').src = 'https://placehold.co/150x150/e2e8f0/64748b?text=Foto';
+            document.getElementById('modal-student-title').textContent = 'Tambah Siswa Baru';
+            document.getElementById('modal-student-form').classList.remove('hidden');
+        };
+
+        window.openEditStudentModal = function(id) {
+            const st = students.find(s => String(s.id) === String(id));
+            if (!st) return;
+
+            document.getElementById('student-edit-id').value = st.id;
+            document.getElementById('student-name').value = st.name;
+            document.getElementById('student-nisn').value = st.nisn;
+            document.getElementById('student-grade').value = normalizeGrade(st.grade);
+            document.getElementById('student-photo-file').value = '';
+            document.getElementById('student-photo-preview').src = st.photo || 'https://placehold.co/150x150/e2e8f0/64748b?text=Foto';
+            document.getElementById('modal-student-title').textContent = 'Edit Data & Foto Siswa';
+            document.getElementById('modal-student-form').classList.remove('hidden');
+        };
+
+        window.closeStudentModal = function() {
+            document.getElementById('modal-student-form').classList.add('hidden');
+        };
+
+        window.previewStudentPhoto = function(e) {
+            const file = e.target && e.target.files && e.target.files[0];
+            if (file) compressImage(file, 120, 120, 0.5, (compressed) => { document.getElementById('student-photo-preview').src = compressed; });
+        };
+
+        window.handleSaveStudent = function(e) {
+            if (e) e.preventDefault();
+            const idInput = document.getElementById('student-edit-id').value;
+            const name = document.getElementById('student-name').value.trim();
+            const nisn = document.getElementById('student-nisn').value.trim();
+            const grade = normalizeGrade(document.getElementById('student-grade').value);
+            const photo = document.getElementById('student-photo-preview').src;
+
+            if (!name || !nisn) { showToast("Nama dan NISN wajib diisi!"); return; }
+
+            if (idInput) {
+                const index = students.findIndex(s => String(s.id) === String(idInput));
+                if (index !== -1) students[index] = { ...students[index], name, nisn, grade, photo };
+            } else {
+                students.push({ id: 's_' + Date.now(), name, nisn, grade, photo });
+            }
+
+            saveLocalData();
+            renderManageStudentTable();
+
+            // KIRIM DATA SISWA BARU KE GOOGLE SHEETS VIA APPS SCRIPT
+            if (GOOGLE_APPS_SCRIPT_URL !== "") {
+                fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'tambah_siswa', nisn: nisn, nama: name, kelas: `Kelas ${grade}` })
+                }).catch(err => console.error("Error Apps Script Siswa:", err));
+            }
+
+            closeStudentModal();
+            showToast("Data siswa berhasil disimpan!");
+        };
+
+        window.openDeleteStudentModal = function(id) {
+            const st = students.find(s => String(s.id) === String(id));
+            if (!st) return;
+            document.getElementById('delete-student-id').value = id;
+            document.getElementById('delete-student-msg').textContent = `Apakah Anda yakin ingin menghapus data ${st.name} (NISN: ${st.nisn})?`;
+            document.getElementById('modal-delete-student').classList.remove('hidden');
+        };
+
+        window.closeDeleteStudentModal = function() { document.getElementById('modal-delete-student').classList.add('hidden'); };
+
+        window.confirmDeleteStudent = function() {
+            const id = document.getElementById('delete-student-id').value;
+            students = students.filter(s => String(s.id) !== String(id));
+            saveLocalData(); renderManageStudentTable(); closeDeleteStudentModal();
+            showToast('Data Siswa Berhasil Dihapus');
+        };
+
+        window.handleSaveMedia = function(e) {
+            if (e) e.preventDefault();
+            const grade = normalizeGrade(document.getElementById('media-target-grade').value);
+            const title = document.getElementById('media-title').value.trim();
+            const url = document.getElementById('media-url').value.trim();
+
+            mediaLinks.push({ id: 'm_' + Date.now(), grade, title, url });
+            saveLocalData();
+
+            // KIRIM LINK PEMBELAJARAN KE GOOGLE SHEETS VIA APPS SCRIPT
+            if (GOOGLE_APPS_SCRIPT_URL !== "") {
+                fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'tambah_media', kelas: `Kelas ${grade}`, judul: title, url: url })
+                }).catch(err => console.error("Error Apps Script Media:", err));
+            }
+
+            document.getElementById('media-title').value = ''; document.getElementById('media-url').value = '';
+            renderTeacherMediaList(); showToast('Link Pembelajaran Berhasil Ditambahkan!');
+        };
+
+        window.renderTeacherMediaList = function() {
+            const container = document.getElementById('teacher-media-list');
+            if (!container) return; container.innerHTML = '';
+
+            if (mediaLinks.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-xs text-center py-4">Belum ada link pembelajaran tersimpan.</p>`;
+                return;
+            }
+
+            mediaLinks.forEach(m => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs";
+                div.innerHTML = `
+                    <div>
+                        <span class="font-bold text-indigo-600 block">Kelas ${normalizeGrade(m.grade)} - ${m.title}</span>
+                        <a href="${m.url}" target="_blank" class="text-slate-500 hover:underline truncate block max-w-xs">${m.url}</a>
+                    </div>
+                    <button onclick="deleteMediaLink('${m.id}')" class="p-1.5 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg transition" title="Hapus Link">
+                        <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+            if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+        };
+
+        window.deleteMediaLink = function(id) {
+            mediaLinks = mediaLinks.filter(m => String(m.id) !== String(id));
+            saveLocalData(); renderTeacherMediaList(); showToast('Link Pembelajaran Berhasil Dihapus');
+        };
+
+        window.handleSaveGame = function(e) {
+            if (e) e.preventDefault();
+            const grade = normalizeGrade(document.getElementById('game-target-grade').value);
+            const title = document.getElementById('game-title').value.trim();
+            const url = document.getElementById('game-url').value.trim();
+
+            gameLinks.push({ id: 'g_' + Date.now(), grade, title, url });
+            saveLocalData();
+
+            // KIRIM LINK GAME KE GOOGLE SHEETS VIA APPS SCRIPT
+            if (GOOGLE_APPS_SCRIPT_URL !== "") {
+                fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'tambah_game', kelas: `Kelas ${grade}`, judul: title, url: url })
+                }).catch(err => console.error("Error Apps Script Game:", err));
+            }
+
+            document.getElementById('game-title').value = ''; document.getElementById('game-url').value = '';
+            renderTeacherGameList(); showToast('Link Game Interaktif Berhasil Ditambahkan!');
+        };
+
+        window.renderTeacherGameList = function() {
+            const container = document.getElementById('teacher-game-list');
+            if (!container) return; container.innerHTML = '';
+
+            if (gameLinks.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-xs text-center py-4">Belum ada link game interaktif tersimpan.</p>`;
+                return;
+            }
+
+            gameLinks.forEach(g => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs";
+                div.innerHTML = `
+                    <div>
+                        <span class="font-bold text-purple-600 block">Kelas ${normalizeGrade(g.grade)} - ${g.title}</span>
+                        <a href="${g.url}" target="_blank" class="text-slate-500 hover:underline truncate block max-w-xs">${g.url}</a>
+                    </div>
+                    <button onclick="deleteGameLink('${g.id}')" class="p-1.5 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg transition" title="Hapus Link">
+                        <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+            if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+        };
+
+        window.deleteGameLink = function(id) {
+            gameLinks = gameLinks.filter(g => String(g.id) !== String(id));
+            saveLocalData(); renderTeacherGameList(); showToast('Link Game Interaktif Berhasil Dihapus');
+        };
+
+        function renderSchoolProfileForm() {
+            document.getElementById('profile-school-name').value = schoolProfile.name;
+            document.getElementById('profile-school-city').value = schoolProfile.city;
+            document.getElementById('profile-academic-year').value = schoolProfile.academicYear;
+            document.getElementById('profile-banner-title').value = schoolProfile.bannerTitle;
+            document.getElementById('profile-banner-desc').value = schoolProfile.bannerDesc;
+            document.getElementById('logo-left-preview').src = schoolProfile.logoLeft;
+            document.getElementById('logo-right-preview').src = schoolProfile.logoRight;
+        }
+
+        window.previewLogoLeft = function(e) {
+            const file = e.target.files && e.target.files[0];
+            if (file) compressImage(file, 200, 200, 0.7, (compressed) => { document.getElementById('logo-left-preview').src = compressed; });
+        };
+
+        window.previewLogoRight = function(e) {
+            const file = e.target.files && e.target.files[0];
+            if (file) compressImage(file, 200, 200, 0.7, (compressed) => { document.getElementById('logo-right-preview').src = compressed; });
+        };
+
+        window.handleSaveSchoolProfile = function(e) {
+            if (e) e.preventDefault();
+            schoolProfile.name = document.getElementById('profile-school-name').value.trim();
+            schoolProfile.city = document.getElementById('profile-school-city').value.trim();
+            schoolProfile.academicYear = document.getElementById('profile-academic-year').value.trim();
+            schoolProfile.bannerTitle = document.getElementById('profile-banner-title').value.trim();
+            schoolProfile.bannerDesc = document.getElementById('profile-banner-desc').value.trim();
+            schoolProfile.logoLeft = document.getElementById('logo-left-preview').src;
+            schoolProfile.logoRight = document.getElementById('logo-right-preview').src;
+
+            saveLocalData(); renderHeaderSchoolInfo();
+            showToast('Pengaturan Profil & Kop Surat Disimpan!');
+        };
+
+        function renderHeaderSchoolInfo() {
+            document.getElementById('header-school-name').textContent = schoolProfile.name;
+            document.getElementById('header-school-city').textContent = schoolProfile.city;
+            document.getElementById('header-academic-year').textContent = schoolProfile.academicYear;
+            document.getElementById('header-logo').src = schoolProfile.logoRight;
+            document.getElementById('banner-title').textContent = schoolProfile.bannerTitle;
+            document.getElementById('banner-desc').textContent = schoolProfile.bannerDesc;
+        }
+
+        window.openResetModal = function(type) {
+            document.getElementById('reset-type-input').value = type;
+            if (type === 'presensi') {
+                document.getElementById('reset-confirm-msg').textContent = 'Apakah Anda yakin ingin menghapus seluruh riwayat presensi simulasi?';
+            } else {
+                document.getElementById('reset-confirm-msg').textContent = 'Apakah Anda yakin ingin MERESET TOTAL seluruh data simulasi?';
+            }
+            document.getElementById('modal-reset-confirm').classList.remove('hidden');
+        };
+
+        window.closeResetModal = function() { document.getElementById('modal-reset-confirm').classList.add('hidden'); };
+
+        window.executeDataReset = function() {
+            const type = document.getElementById('reset-type-input').value;
+            if (type === 'presensi') {
+                attendanceRecords = {}; saveLocalData(); showToast('Seluruh Data Presensi Berhasil Dibersihkan!');
+            } else {
+                localStorage.clear(); location.reload();
+            }
+            closeResetModal();
+        };
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 3000);
+        }
+
+        window.onload = function() {
+            loadLocalData();
+            const todayStr = getLocalDateString();
+            document.getElementById('presensi-date-input').value = todayStr;
+            document.getElementById('recap-filter-month').value = todayStr.substring(0, 7);
+
+            renderHeaderSchoolInfo();
+            navigateTo('dashboard');
+            if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+            initCloudSync();
+        };
+    </script>
+</body>
+</html>
